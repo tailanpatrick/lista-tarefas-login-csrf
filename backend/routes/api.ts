@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { register } from '../controllers/registerController';
 import { login, logOut, getSession } from '../controllers/loginController';
 import {
+	registerTask,
 	getTask,
 	getTasks,
 	editTask,
@@ -24,7 +25,7 @@ route.get('/logout', logOut);
 // Rotas de tasks
 route.get('/tasks', getTasks); // lista todas as tasks
 route.get('/task/:id', getTask); // pega task específica
-route.post('/task', register); // cria task
+route.post('/task', registerTask); // cria task
 route.put('/task/:id', editTask); // edita task
 route.delete('/task/:id', deleteTask); // deleta task
 

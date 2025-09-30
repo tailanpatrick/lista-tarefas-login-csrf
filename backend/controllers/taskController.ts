@@ -39,7 +39,7 @@ export const getTasks: RequestHandler = async (req, res: Response) => {
 		return res.status(200).json({ tasks });
 	} catch (err: any) {
 		console.error(err);
-		return res.status(400).json({ message: 'Falha ao buscar tasks' });
+		return res.status(400).json({ message: 'Falha ao buscar Tarefas' });
 	}
 };
 
@@ -53,14 +53,14 @@ export const getTask: RequestHandler = async (req, res: Response) => {
 		const task = await Task.getTask(taskId);
 
 		if (!task) {
-			return res.status(404).json({ error: 'Task não encontrada.' });
+			return res.status(404).json({ error: 'Tarefa não encontrada.' });
 		}
 
 		const taskUserId = task.user._id.toString();
 
 		if (taskUserId !== userId) {
 			return res.status(403).json({
-				error: 'Você não tem permissão para acessar esta task.',
+				error: 'Você não tem permissão para acessar esta Tarefa.',
 			});
 		}
 
@@ -80,19 +80,19 @@ export const deleteTask: RequestHandler = async (req, res: Response) => {
 	if (!taskId) {
 		return res
 			.status(400)
-			.json({ error: 'Forneça o id da task a ser deletada' });
+			.json({ error: 'Forneça o id da Tarefa a ser deletada' });
 	}
 
 	const taskExist = await Task.getTask(taskId);
 	if (!taskExist) {
-		return res.status(400).json({ error: 'Task não existe' });
+		return res.status(400).json({ error: 'Essa Tarefa não existe' });
 	}
 
 	const taskUserId = taskExist.user._id.toString();
 	if (taskUserId !== userId) {
-		return res
-			.status(403)
-			.json({ error: 'Você não tem permissão para deletar esta task.' });
+		return res.status(403).json({
+			error: 'Você não tem permissão para deletar esta Tarefa.',
+		});
 	}
 
 	const taskDeleted = await Task.delete(taskId);

@@ -10,6 +10,14 @@ export const login: RequestHandler = async (req, res) => {
 	const reqWithUser = req as RequestWithUser;
 
 	try {
+		const { email, password } = reqWithUser.body;
+
+		if (!email || !password) {
+			return res
+				.status(400)
+				.json({ error: 'Preencha todos os campos: email e senha.' });
+		}
+
 		const user = new User(req.body);
 		await user.login();
 

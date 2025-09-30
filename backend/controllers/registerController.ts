@@ -4,6 +4,14 @@ import { RequestWithUser } from '../interfaces/request-with-user-and-session';
 
 export const register: RequestHandler = async (req, res: Response) => {
 	try {
+		const { email, password } = req.body;
+
+		if (!email || !password) {
+			return res
+				.status(400)
+				.json({ error: 'Preencha todos os campos: email e senha.' });
+		}
+
 		const user = new User(req.body);
 
 		await user.register();

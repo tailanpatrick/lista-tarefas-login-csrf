@@ -8,14 +8,14 @@ import flash from 'connect-flash';
 import path from 'path';
 import helmet from 'helmet';
 
-import routes from './src/backend/routes/api';
-import api from './src/backend/routes/api';
+import routes from './routes/api';
+import api from './routes/api';
 import {
 	middlewareGlobal,
 	checkError,
 	csrfMiddleware,
 	check404,
-} from './src/backend/middlewares/middleware';
+} from './middlewares/middleware';
 
 dotenv.config();
 

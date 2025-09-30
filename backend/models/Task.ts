@@ -2,7 +2,7 @@ import mongoose, { Document, Model } from 'mongoose';
 
 interface ITask extends Document {
 	title: string;
-	stateOfCompletion: string;
+	stateOfCompletion: boolean;
 	createdAt: Date;
 	user: mongoose.Types.ObjectId;
 }
@@ -13,7 +13,7 @@ const TaskSchema = new mongoose.Schema<ITask>({
 		required: true,
 	},
 	stateOfCompletion: {
-		type: String,
+		type: Boolean,
 		required: true,
 	},
 	createdAt: {
@@ -63,16 +63,16 @@ class Task {
 	async validate(): Promise<void> {
 		this.cleanUp();
 
-		if (!this.body.title) this.errors.push('Nome é um campo obrigatório.');
+		if (!this.body.title) this.errors.push('title é um campo obrigatório.');
 		if (!this.body.stateOfCompletion)
-			this.errors.push('Status de conclusão é um campo obrigatório.');
+			this.errors.push('stateOfCompletion é um campo obrigatório.');
 		if (!this.body.user) this.errors.push('Usuário inválido.');
 	}
 
 	cleanUp(): void {
 		this.body = {
 			title: this.body.title?.trim(),
-			stateOfCompletion: this.body.stateOfCompletion?.trim(),
+			stateOfCompletion: this.body.stateOfCompletion,
 			user: this.body.user,
 		};
 	}
