@@ -1,11 +1,10 @@
 {
 	"compilerOptions": {
-		"target": "ES6",
-		"module": "commonjs",
-		"moduleResolution": "node",
+		"strict": true,
 		"esModuleInterop": true,
-		"allowJs": true,
-		"strict": true
-	},
-	"include": ["src/**/*", "globals.d.ts"]
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
+		"moduleResolution": "node",
+		"resolveJsonModule": true
+	}
 }
