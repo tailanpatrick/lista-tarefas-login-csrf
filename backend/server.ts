@@ -7,13 +7,13 @@ import MongoStore from 'connect-mongo';
 import flash from 'connect-flash';
 import path from 'path';
 import helmet from 'helmet';
+import csurf from 'csurf';
 
 import routes from './routes/api';
 import api from './routes/api';
 import {
 	middlewareGlobal,
 	checkError,
-	csrfMiddleware,
 	check404,
 } from './middlewares/middleware';
 
@@ -24,9 +24,7 @@ const CONNECTION_STRING = process.env.MONGO_DB_CONECTION_STRING || '';
 
 mongoose
 	.connect(CONNECTION_STRING)
-	.then(() => {
-		app.emit('pronto');
-	})
+	.then(() => app.emit('pronto'))
 	.catch((e) => console.error(e));
 
 const allowedOrigins = [
@@ -34,41 +32,33 @@ const allowedOrigins = [
 	'http://192.168.100.175:3000',
 	'https://agenda-de-contatos-theta-two.vercel.app',
 ];
+
 app.use(
 	cors({
-		origin: function (origin: string | undefined, callback: any) {
-			if (!origin || allowedOrigins.includes(origin)) {
+		origin: (origin, callback) => {
+			if (!origin || allowedOrigins.includes(origin))
 				callback(null, true);
-			} else {
-				callback(new Error('Not allowed by CORS'));
-			}
+			else callback(new Error('Not allowed by CORS'));
 		},
 		credentials: true,
 	})
 );
 
-// Middlewares de parsing e estáticos
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.resolve(__dirname, 'public')));
 
-// Configurando sessão
 const sessionOptions: session.SessionOptions = {
 	secret: 'asdfgasdfg',
 	store: MongoStore.create({ mongoUrl: CONNECTION_STRING }),
 	resave: false,
 	saveUninitialized: false,
-	cookie: {
-		maxAge: 1000 * 60 * 60 * 24 * 7,
-		httpOnly: true,
-	},
+	cookie: { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true },
 	unset: 'destroy',
 };
-
 app.use(session(sessionOptions));
 app.use(flash());
 
-// Helmet para segurança
 app.use(helmet());
 app.use(
 	helmet.contentSecurityPolicy({
@@ -85,24 +75,23 @@ app.use(
 	})
 );
 
-// Middlewares globais e de CSRF
+/* --------- Middlewares globais --------- */
 app.use(middlewareGlobal);
-app.use(checkError);
 
-// Configuração das views
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs'); // ou outro engine que você use
+/* --------- Rotas --------- */
 
-// Rotas
 app.use('/api', api);
 app.use(routes);
 
-// Middleware 404
+/* --------- 404 --------- */
 app.use(check404);
 
-// Iniciando servidor após conexão com MongoDB
+/* --------- Middleware de erro --------- */
+app.use(checkError);
+
+/* --------- Inicia servidor --------- */
 app.on('pronto', () => {
 	app.listen(3000, () => {
-		console.log('Servidor subiu na porta 3000');
+		console.log('Servidor rodando na porta 3000');
 	});
 });

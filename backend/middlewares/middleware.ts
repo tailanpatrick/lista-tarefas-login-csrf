@@ -1,44 +1,51 @@
-import { Request, Response, NextFunction } from 'express';
+import {
+	RequestHandler,
+	ErrorRequestHandler,
+	Request,
+	Response,
+	NextFunction,
+} from 'express';
+import { RequestWithUser } from '../interfaces/request-with-user-and-session';
 
-// Middleware global
-export const middlewareGlobal = (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
+/* Middleware global */
+export const middlewareGlobal: RequestHandler = (req, res, next) => {
 	next();
 };
 
-// Middleware CSRF
-export const csrfMiddleware = (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
-	// Cast local para "any" apenas aqui para acessar csrfToken
-	const token = (req as any).csrfToken?.();
-	res.locals.csrfToken = token;
+/* Middleware CSRF */
+export const csrfMiddleware: RequestHandler = (req, res, next) => {
+	res.locals.csrfToken =
+		typeof (req as any).csrfToken === 'function'
+			? (req as any).csrfToken()
+			: null;
 	next();
 };
 
-// Middleware para verificar erros de CSRF
-export const checkError = (
-	err: any,
-	req: Request,
+/* Middleware de autenticação */
+export const authMiddleware: RequestHandler = (
+	req: RequestWithUser,
 	res: Response,
 	next: NextFunction
 ) => {
+	if (!req.session || !req.session.user?._id) {
+		return res.status(401).json({ error: 'Usuário não autenticado' });
+	}
+	next();
+};
+
+/* Middleware de erro */
+export const checkError: ErrorRequestHandler = (err, req, res, next) => {
 	if (err?.code === 'EBADCSRFTOKEN') {
 		return res.status(403).json({
 			error: 'Operação não permitida. Token CSRF inválido ou ausente.',
 		});
 	}
 
-	// Outros erros
-	res.status(500).json({ error: 'Erro interno do servidor' });
+	console.error(err);
+	return res.status(500).json({ error: 'Erro interno do servidor' });
 };
 
-// Middleware 404
-export const check404 = (req: Request, res: Response, next: NextFunction) => {
+/* Middleware 404 */
+export const check404: RequestHandler = (req, res, next) => {
 	res.status(404).json({ error: 'A página solicitada não existe' });
 };

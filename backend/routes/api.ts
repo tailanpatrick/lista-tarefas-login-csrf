@@ -8,6 +8,7 @@ import {
 	editTask,
 	deleteTask,
 } from '../controllers/taskController';
+import { authMiddleware, csrfMiddleware } from '../middlewares/middleware';
 
 const route = Router();
 
@@ -23,10 +24,10 @@ route.post('/login', login);
 route.get('/logout', logOut);
 
 // Rotas de tasks
-route.get('/tasks', getTasks); // lista todas as tasks
-route.get('/task/:id', getTask); // pega task específica
-route.post('/task', registerTask); // cria task
-route.put('/task/:id', editTask); // edita task
-route.delete('/task/:id', deleteTask); // deleta task
+route.get('/tasks', authMiddleware, getTasks); // GET protegido
+route.get('/task/:id', authMiddleware, getTask); // GET protegido
+route.post('/task', authMiddleware, csrfMiddleware, registerTask);
+route.put('/task/:id', authMiddleware, csrfMiddleware, editTask);
+route.delete('/task/:id', authMiddleware, csrfMiddleware, deleteTask);
 
 export default route;
