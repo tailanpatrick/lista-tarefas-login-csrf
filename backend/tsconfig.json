@@ -1,10 +1,14 @@
 {
 	"compilerOptions": {
+		"outDir": "../dist/backend", // build vai pra raiz
+		"rootDir": "src",
+		"module": "CommonJS",
+		"target": "ES2020",
 		"strict": true,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"skipLibCheck": true,
-		"moduleResolution": "node",
 		"resolveJsonModule": true
-	}
+	},
+	"include": ["src/**/*"]
 }
