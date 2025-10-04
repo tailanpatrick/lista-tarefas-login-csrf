@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { CgLogOff } from 'react-icons/cg';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Header: React.FC = () => {
