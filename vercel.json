@@ -1,16 +1,18 @@
 {
-	"version": 2,
 	"builds": [
 		{
-			"src": "frontend/package.json",
+			"src": "backend/src/server.ts",
+			"use": "@vercel/node",
+			"config": {
+				"includeFiles": ["backend/**"]
+			}
+		},
+		{
+			"src": "frontend/index.html",
 			"use": "@vercel/static-build",
 			"config": {
 				"distDir": "frontend/dist"
 			}
-		},
-		{
-			"src": "backend/src/server.ts",
-			"use": "@vercel/node"
 		}
 	],
 	"routes": [
@@ -20,7 +22,9 @@
 		},
 		{
 			"src": "/(.*)",
-			"dest": "/frontend/dist/$1"
+			"dest": "frontend/index.html"
 		}
-	]
+	],
+	"installCommand": "npm install --prefix backend && npm install --prefix frontend",
+	"buildCommand": "npm run build --prefix frontend"
 }
