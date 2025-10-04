@@ -1,3 +1,4 @@
+// server.ts
 import express, { Application } from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -8,6 +9,7 @@ import flash from 'connect-flash';
 import path from 'path';
 import helmet from 'helmet';
 import csurf from 'csurf';
+import serverless from 'serverless-http';
 
 import routes from './routes/api';
 import api from './routes/api';
@@ -24,7 +26,7 @@ const CONNECTION_STRING = process.env.MONGO_DB_CONECTION_STRING || '';
 
 mongoose
 	.connect(CONNECTION_STRING)
-	.then(() => app.emit('pronto'))
+	.then(() => console.log('MongoDB conectado'))
 	.catch((e) => console.error(e));
 
 const allowedOrigins = [
@@ -49,7 +51,7 @@ app.use(express.json());
 app.use(express.static(path.resolve(__dirname, 'public')));
 
 const sessionOptions: session.SessionOptions = {
-	secret: 'asdfgasdfg',
+	secret: process.env.SESSION_SECRET || 'asdfgasdfg',
 	store: MongoStore.create({ mongoUrl: CONNECTION_STRING }),
 	resave: false,
 	saveUninitialized: false,
@@ -81,7 +83,6 @@ app.use(
 app.use(middlewareGlobal);
 
 /* --------- Rotas --------- */
-
 app.use('/api', api);
 app.use(routes);
 
@@ -91,9 +92,5 @@ app.use(check404);
 /* --------- Middleware de erro --------- */
 app.use(checkError);
 
-/* --------- Inicia servidor --------- */
-app.on('pronto', () => {
-	app.listen(3000, () => {
-		console.log('Servidor rodando na porta 3000');
-	});
-});
+/* --------- Export serverless --------- */
+export const handler = serverless(app);
