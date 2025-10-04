@@ -1,5 +1,4 @@
 # Logs
-logs
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,12 +6,18 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node Modules e Vercel
 node_modules
-dist
-dist-ssr
+.vercel
 *.local
 
-# Editor directories and files
+# Build do Backend (Queremos ignorar o build do Express)
+backend/dist
+
+# Build do Frontend (NÃO ignoramos para que o Vercel possa servir)
+# A pasta frontend/dist SERÁ RASTREADA.
+
+# Outros
 .vscode/*
 !.vscode/extensions.json
 .idea
