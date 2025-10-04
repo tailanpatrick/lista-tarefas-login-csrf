@@ -9,6 +9,8 @@ import {
 	deleteTask,
 } from '../controllers/taskController';
 import { authMiddleware, csrfMiddleware } from '../middlewares/middleware';
+import { validateObjectId } from '../middlewares/validateID';
+import { getCsrfToken } from '../controllers/csrfController';
 
 const route = Router();
 
@@ -17,6 +19,7 @@ route.get('/teste', (req: Request, res: Response) => {
 });
 
 route.get('/__sec/__session', getSession);
+route.get('/__sec/__csrf-token', getCsrfToken);
 
 route.post('/register', register);
 route.post('/login', login);
@@ -25,9 +28,21 @@ route.get('/logout', logOut);
 
 // Rotas de tasks
 route.get('/tasks', authMiddleware, getTasks); // GET protegido
-route.get('/task/:id', authMiddleware, getTask); // GET protegido
+route.get('/task/:id', authMiddleware, validateObjectId, getTask); // GET protegido
 route.post('/task', authMiddleware, csrfMiddleware, registerTask);
-route.put('/task/:id', authMiddleware, csrfMiddleware, editTask);
-route.delete('/task/:id', authMiddleware, csrfMiddleware, deleteTask);
+route.put(
+	'/task/:id',
+	authMiddleware,
+	csrfMiddleware,
+	validateObjectId,
+	editTask
+);
+route.delete(
+	'/task/:id',
+	authMiddleware,
+	csrfMiddleware,
+	validateObjectId,
+	deleteTask
+);
 
 export default route;

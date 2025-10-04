@@ -12,7 +12,7 @@ export const registerTask: RequestHandler = async (req, res: Response) => {
 
 		const task = new Task({
 			title,
-			stateOfCompletion,
+			stateOfCompletion: !!stateOfCompletion,
 			user: userId,
 		});
 
@@ -105,6 +105,7 @@ export const editTask: RequestHandler = async (req, res: Response) => {
 
 	const userId = reqWithUser.session?.user?._id as string;
 	const taskId = reqWithUser.params.id;
+
 	if (!taskId) {
 		return res
 			.status(400)

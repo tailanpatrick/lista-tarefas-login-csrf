@@ -28,8 +28,8 @@ mongoose
 	.catch((e) => console.error(e));
 
 const allowedOrigins = [
-	'http://localhost:3000',
-	'http://192.168.100.175:3000',
+	'http://localhost:5173',
+	'http://192.168.100.175:5173',
 	'https://agenda-de-contatos-theta-two.vercel.app',
 ];
 
@@ -58,6 +58,8 @@ const sessionOptions: session.SessionOptions = {
 };
 app.use(session(sessionOptions));
 app.use(flash());
+
+app.use(csurf());
 
 app.use(helmet());
 app.use(

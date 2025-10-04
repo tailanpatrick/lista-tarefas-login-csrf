@@ -37,20 +37,19 @@ export const login: RequestHandler = async (req, res) => {
 	}
 };
 
-// Get Session
 export const getSession: RequestHandler = (req, res) => {
 	const reqWithUser = req as RequestWithUser;
 
 	if (!reqWithUser.session?.user) {
-		return res.status(401).json({ error: 'Não autorizado' });
+		return res.status(401).json({ user: null, csrfToken: req.csrfToken() });
 	}
 
 	const { password, ...userWithoutPassword } = reqWithUser.session.user;
 
-	return res.json({ user: userWithoutPassword });
+	// Retorna usuário + CSRF token
+	return res.json({ user: userWithoutPassword, csrfToken: req.csrfToken() });
 };
 
-// Logout
 export const logOut: RequestHandler = (req, res) => {
 	const reqWithUser = req as RequestWithUser;
 
@@ -63,7 +62,6 @@ export const logOut: RequestHandler = (req, res) => {
 	});
 };
 
-// Register
 export const register: RequestHandler = async (req, res) => {
 	try {
 		const user = new User(req.body);

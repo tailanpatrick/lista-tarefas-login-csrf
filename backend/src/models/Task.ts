@@ -64,7 +64,7 @@ class Task {
 		this.cleanUp();
 
 		if (!this.body.title) this.errors.push('title é um campo obrigatório.');
-		if (!this.body.stateOfCompletion)
+		if (!this.body.stateOfCompletion === undefined)
 			this.errors.push('stateOfCompletion é um campo obrigatório.');
 		if (!this.body.user) this.errors.push('Usuário inválido.');
 	}
