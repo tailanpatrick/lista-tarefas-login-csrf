@@ -7,12 +7,16 @@ import {
 } from 'express';
 import { RequestWithUser } from '../interfaces/request-with-user-and-session';
 
-/* Middleware global */
+/* Middleware global (AGORA INCLUI A EXPOSIÇÃO DO CSRF TOKEN) */
 export const middlewareGlobal: RequestHandler = (req, res, next) => {
+	res.locals.csrfToken =
+		typeof (req as any).csrfToken === 'function'
+			? (req as any).csrfToken()
+			: null;
 	next();
 };
 
-/* Middleware CSRF */
+/* Middleware CSRF (Função mantida, mas a lógica foi integrada ao middlewareGlobal) */
 export const csrfMiddleware: RequestHandler = (req, res, next) => {
 	res.locals.csrfToken =
 		typeof (req as any).csrfToken === 'function'
@@ -33,8 +37,9 @@ export const authMiddleware: RequestHandler = (
 	next();
 };
 
-/* Middleware de erro */
+/* Middleware de erro (Tratamento restaurado) */
 export const checkError: ErrorRequestHandler = (err, req, res, next) => {
+	// 🚨 A lógica CSRF foi restaurada para garantir resposta 403 JSON
 	if (err?.code === 'EBADCSRFTOKEN') {
 		return res.status(403).json({
 			error: 'Operação não permitida. Token CSRF inválido ou ausente.',
@@ -42,6 +47,7 @@ export const checkError: ErrorRequestHandler = (err, req, res, next) => {
 	}
 
 	console.error(err);
+	// Para todos os outros erros não tratados, retorna um 500 genérico.
 	return res.status(500).json({ error: 'Erro interno do servidor' });
 };
 
