@@ -9,8 +9,6 @@ import flash from 'connect-flash';
 import path from 'path';
 import helmet from 'helmet';
 import csurf from 'csurf';
-import serverless from 'serverless-http';
-// deploy
 import routes from './routes/api';
 import api from './routes/api';
 import {
@@ -93,4 +91,4 @@ app.use(check404);
 app.use(checkError);
 
 /* --------- Export serverless --------- */
-export const handler = serverless(app);
+export default app;
