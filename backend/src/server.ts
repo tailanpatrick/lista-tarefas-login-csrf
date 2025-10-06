@@ -22,6 +22,8 @@ dotenv.config();
 const app: Application = express();
 const CONNECTION_STRING = process.env.MONGO_DB_CONECTION_STRING || '';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 mongoose
 	.connect(CONNECTION_STRING)
 	.then(() => app.emit('pronto'))
@@ -48,7 +50,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.resolve(__dirname, 'public')));
 
-// ...
 const sessionOptions: session.SessionOptions = {
 	secret: 'asdfgasdfg',
 	store: MongoStore.create({ mongoUrl: CONNECTION_STRING }),
@@ -58,8 +59,8 @@ const sessionOptions: session.SessionOptions = {
 		maxAge: 1000 * 60 * 60 * 24 * 7,
 		httpOnly: true,
 
-		secure: true,
-		sameSite: 'none',
+		secure: isProduction,
+		sameSite: isProduction ? 'none' : 'lax',
 	},
 	unset: 'destroy',
 };
@@ -80,23 +81,21 @@ app.use(
 				"'unsafe-eval'",
 				'https://unpkg.com',
 			],
-			connectSrc: ["'self'", 'http://192.168.100.175:3000'],
+			connectSrc: [
+				"'self'",
+				'https://lista-tarefas-login-csrf.vercel.app',
+			],
 		},
 	})
 );
 
-/* --------- Middlewares globais --------- */
 app.use(middlewareGlobal);
-
-/* --------- Rotas --------- */
 
 app.use('/api', api);
 app.use(routes);
 
-/* --------- 404 --------- */
 app.use(check404);
 
-/* --------- Middleware de erro --------- */
 app.use(checkError);
 
 export default app;
