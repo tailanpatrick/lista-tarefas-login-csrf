@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 	const [csrfToken, setCsrfToken] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 
+	// Atualiza o CSRF token
 	const refreshCsrf = async () => {
 		try {
 			const res = await api.get('/__sec/__csrf-token', {
@@ -48,6 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 		}
 	};
 
+	// Carrega a sessão existente (se houver)
 	const loadSession = async () => {
 		try {
 			const res = await api.get('/__sec/__session', {
@@ -55,10 +57,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 				timeout: 7000,
 			});
 
-			setUser(res.data.user || null);
-			setCsrfToken(res.data.csrfToken || null);
+			// Se houver user no backend, use-o; se não, cria user fictício se sessão ativa
+			const userFromBackend =
+				res.data.user ||
+				(res.data.isAuthenticated ? { email: 'logado' } : null);
+			setUser(userFromBackend);
 
 			if (res.data.csrfToken) {
+				setCsrfToken(res.data.csrfToken);
 				api.defaults.headers.common['X-CSRF-Token'] =
 					res.data.csrfToken;
 			}
@@ -71,14 +77,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 		}
 	};
 
+	// Login
 	const login = async (data: LoginType) => {
 		await refreshCsrf();
 		try {
 			const res = await api.post('/login', data, {
 				withCredentials: true,
 			});
-			setUser(res.data.user);
-			setToken(res.data.token || null);
+
+			// Se backend retornar apenas sucesso, cria objeto user fictício
+			if (res.data === 'success') {
+				setUser({
+					_id: 'temp-id',
+					email: data.email,
+				});
+			} else if (res.data.user) {
+				setUser(res.data.user);
+			}
+
 			await refreshCsrf();
 		} catch (err) {
 			console.error('Erro no login:', err);
@@ -86,6 +102,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 		}
 	};
 
+	// Logout
 	const logout = async () => {
 		try {
 			await api.get('/logout', { withCredentials: true });
