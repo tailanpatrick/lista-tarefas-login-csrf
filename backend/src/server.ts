@@ -77,18 +77,18 @@ app.use(
 	})
 );
 
-/* --------- Middlewares globais --------- */
+/* Middlewares globais */
 app.use(middlewareGlobal);
 
-/* --------- Rotas --------- */
+/* Rotas */
 app.use('/api', api);
 app.use(routes);
 
-/* --------- 404 --------- */
-app.use(check404);
-
-/* --------- Middleware de erro --------- */
+/* Middleware de erro (DEVE VIR ANTES DO 404) */
 app.use(checkError);
 
-/* --------- Export serverless --------- */
+/* 404 (AGORA VEM POR ÚLTIMO) */
+app.use(check404);
+
+/* Export serverless */
 export default app;
