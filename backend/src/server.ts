@@ -1,4 +1,3 @@
-// server.ts
 import express, { Application } from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
@@ -22,40 +21,44 @@ dotenv.config();
 const app: Application = express();
 const CONNECTION_STRING = process.env.MONGO_DB_CONECTION_STRING || '';
 
+if (!CONNECTION_STRING) {
+	console.error(
+		'ERRO: Variável de ambiente MONGO_DB_CONECTION_STRING não está definida.'
+	);
+	process.exit(1);
+}
+
 mongoose
 	.connect(CONNECTION_STRING)
 	.then(() => console.log('MongoDB conectado'))
-	.catch((e) => console.error(e));
-
-const vercelPreviewUrl = process.env.VERCEL_URL
-	? `https://${process.env.VERCEL_URL}`
-	: '';
+	.catch((e) => console.error('Erro de Conexão com MongoDB:', e));
 
 const allowedOrigins = [
 	'http://localhost:5173',
 	'http://192.168.100.175:5173',
 	'https://lista-tarefas-login-csrf.vercel.app',
-	vercelPreviewUrl,
+	process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '',
 ];
 
 app.use(
 	cors({
 		origin: (origin, callback) => {
 			const requestOrigin = origin ? origin.replace(/\/$/, '') : null;
-			const isVercelPreview =
-				requestOrigin &&
-				vercelPreviewUrl &&
-				requestOrigin.startsWith(vercelPreviewUrl);
 
-			if (
-				!requestOrigin ||
-				allowedOrigins.includes(requestOrigin) ||
-				isVercelPreview
-			) {
-				callback(null, true);
-			} else {
-				callback(new Error('Not allowed by CORS'));
+			if (!requestOrigin) {
+				return callback(null, true);
 			}
+
+			if (allowedOrigins.includes(requestOrigin)) {
+				return callback(null, true);
+			}
+
+			if (requestOrigin.endsWith('.vercel.app')) {
+				return callback(null, true);
+			}
+
+			// Se a origem não for permitida
+			callback(new Error(`Not allowed by CORS: ${requestOrigin}`));
 		},
 		credentials: true,
 	})
@@ -70,7 +73,13 @@ const sessionOptions: session.SessionOptions = {
 	store: MongoStore.create({ mongoUrl: CONNECTION_STRING }),
 	resave: false,
 	saveUninitialized: false,
-	cookie: { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true },
+	cookie: {
+		maxAge: 1000 * 60 * 60 * 24 * 7,
+		httpOnly: true,
+		secure:
+			process.env.NODE_ENV === 'production' ||
+			process.env.VERCEL_ENV === 'production',
+	},
 	unset: 'destroy',
 };
 app.use(session(sessionOptions));
@@ -89,7 +98,11 @@ app.use(
 				"'unsafe-eval'",
 				'https://unpkg.com',
 			],
-			connectSrc: ["'self'", 'http://192.168.100.175:3000'],
+			connectSrc: [
+				"'self'",
+				'http://192.168.100.175:3000',
+				'https://*.vercel.app',
+			],
 		},
 	})
 );
