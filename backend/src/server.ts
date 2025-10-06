@@ -33,6 +33,10 @@ mongoose
 	.then(() => console.log('MongoDB conectado'))
 	.catch((e) => console.error('Erro de Conexão com MongoDB:', e));
 
+const isProduction =
+	process.env.NODE_ENV === 'production' ||
+	process.env.VERCEL_ENV === 'production';
+
 const allowedOrigins = [
 	'http://localhost:5173',
 	'http://192.168.100.175:5173',
@@ -57,7 +61,6 @@ app.use(
 				return callback(null, true);
 			}
 
-			// Se a origem não for permitida
 			callback(new Error(`Not allowed by CORS: ${requestOrigin}`));
 		},
 		credentials: true,
@@ -76,9 +79,8 @@ const sessionOptions: session.SessionOptions = {
 	cookie: {
 		maxAge: 1000 * 60 * 60 * 24 * 7,
 		httpOnly: true,
-		secure:
-			process.env.NODE_ENV === 'production' ||
-			process.env.VERCEL_ENV === 'production',
+		secure: isProduction,
+		sameSite: isProduction ? 'none' : 'lax',
 	},
 	unset: 'destroy',
 };
