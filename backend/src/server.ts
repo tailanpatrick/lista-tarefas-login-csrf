@@ -61,9 +61,12 @@ const sessionOptions: session.SessionOptions = {
 
 		secure: isProduction,
 		sameSite: isProduction ? 'none' : 'lax',
+		// 🚨 CORREÇÃO ESSENCIAL: Garante que o cookie funcione em subdomínios do Vercel
+		domain: isProduction ? '.vercel.app' : undefined,
 	},
 	unset: 'destroy',
 };
+
 app.use(session(sessionOptions));
 
 app.use(flash());
