@@ -5,7 +5,6 @@ import cors from 'cors';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import flash from 'connect-flash';
-import path from 'path';
 import helmet from 'helmet';
 import csurf from 'csurf';
 
@@ -48,7 +47,6 @@ app.use(
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(path.resolve(__dirname, 'public')));
 
 const sessionOptions: session.SessionOptions = {
 	secret: 'asdfgasdfg',
