@@ -27,18 +27,35 @@ mongoose
 	.then(() => console.log('MongoDB conectado'))
 	.catch((e) => console.error(e));
 
+const vercelPreviewUrl = process.env.VERCEL_URL
+	? `https://${process.env.VERCEL_URL}`
+	: '';
+
 const allowedOrigins = [
 	'http://localhost:5173',
 	'http://192.168.100.175:5173',
-	'https://lista-tarefas-login-csrf.vercel.app/',
+	'https://lista-tarefas-login-csrf.vercel.app',
+	vercelPreviewUrl,
 ];
 
 app.use(
 	cors({
 		origin: (origin, callback) => {
-			if (!origin || allowedOrigins.includes(origin))
+			const requestOrigin = origin ? origin.replace(/\/$/, '') : null;
+			const isVercelPreview =
+				requestOrigin &&
+				vercelPreviewUrl &&
+				requestOrigin.startsWith(vercelPreviewUrl);
+
+			if (
+				!requestOrigin ||
+				allowedOrigins.includes(requestOrigin) ||
+				isVercelPreview
+			) {
 				callback(null, true);
-			else callback(new Error('Not allowed by CORS'));
+			} else {
+				callback(new Error('Not allowed by CORS'));
+			}
 		},
 		credentials: true,
 	})
@@ -77,18 +94,13 @@ app.use(
 	})
 );
 
-/* Middlewares globais */
 app.use(middlewareGlobal);
 
-/* Rotas */
 app.use('/api', api);
 app.use(routes);
 
-/* Middleware de erro (DEVE VIR ANTES DO 404) */
 app.use(checkError);
 
-/* 404 (AGORA VEM POR ÚLTIMO) */
 app.use(check404);
 
-/* Export serverless */
 export default app;
