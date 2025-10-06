@@ -49,15 +49,13 @@ app.use(
 				return callback(null, true);
 			}
 
-			if (allowedOrigins.includes(requestOrigin)) {
+			if (
+				allowedOrigins.includes(requestOrigin) ||
+				requestOrigin.endsWith('.vercel.app')
+			) {
 				return callback(null, true);
 			}
 
-			if (requestOrigin.endsWith('.vercel.app')) {
-				return callback(null, true);
-			}
-
-			// Se a origem não for permitida
 			callback(new Error(`Not allowed by CORS: ${requestOrigin}`));
 		},
 		credentials: true,
@@ -68,6 +66,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.resolve(__dirname, 'public')));
 
+// --- Configurações de Sessão ---
 const sessionOptions: session.SessionOptions = {
 	secret: process.env.SESSION_SECRET || 'asdfgasdfg',
 	store: MongoStore.create({ mongoUrl: CONNECTION_STRING }),
@@ -79,11 +78,15 @@ const sessionOptions: session.SessionOptions = {
 		secure:
 			process.env.NODE_ENV === 'production' ||
 			process.env.VERCEL_ENV === 'production',
+		sameSite: 'none',
 	},
 	unset: 'destroy',
 };
 app.use(session(sessionOptions));
 app.use(flash());
+
+app.use('/api', api);
+app.use(routes);
 
 app.use(csurf());
 
@@ -108,9 +111,6 @@ app.use(
 );
 
 app.use(middlewareGlobal);
-
-app.use('/api', api);
-app.use(routes);
 
 app.use(checkError);
 
