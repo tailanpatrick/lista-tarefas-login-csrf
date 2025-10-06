@@ -41,7 +41,7 @@ export const getSession: RequestHandler = (req, res) => {
 	const reqWithUser = req as RequestWithUser;
 
 	if (!reqWithUser.session?.user) {
-		return res.status(401).json({ user: null, csrfToken: req.csrfToken() });
+		return res.status(200).json({ user: null, csrfToken: req.csrfToken() });
 	}
 
 	const { password, ...userWithoutPassword } = reqWithUser.session.user;
