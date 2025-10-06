@@ -26,11 +26,23 @@ route.post('/login', login);
 
 route.get('/logout', logOut);
 
-// Rotas de tasks
-route.get('/tasks', authMiddleware, getTasks); // GET protegido
-route.get('/task/:id', authMiddleware, getTask); // GET protegido
-route.post('/task', authMiddleware, registerTask);
-route.put('/task/:id', authMiddleware, validateObjectId, editTask);
-route.delete('/task/:id', authMiddleware, validateObjectId, deleteTask);
+route.get('/tasks', authMiddleware, getTasks);
+route.get('/task/:id', authMiddleware, validateObjectId, getTask);
+route.post('/task', authMiddleware, csrfMiddleware, registerTask);
+
+route.put(
+	'/task/:id',
+	authMiddleware,
+	csrfMiddleware,
+	validateObjectId,
+	editTask
+);
+route.delete(
+	'/task/:id',
+	authMiddleware,
+	csrfMiddleware,
+	validateObjectId,
+	deleteTask
+);
 
 export default route;

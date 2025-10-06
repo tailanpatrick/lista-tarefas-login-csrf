@@ -71,8 +71,6 @@ app.use(session(sessionOptions));
 
 app.use(flash());
 
-app.use(csurf());
-
 app.use(helmet());
 app.use(
 	helmet.contentSecurityPolicy({
@@ -95,7 +93,10 @@ app.use(
 app.use(middlewareGlobal);
 
 app.use('/api', api);
+
 app.use(routes);
+
+app.use(csurf());
 
 app.use(check404);
 
