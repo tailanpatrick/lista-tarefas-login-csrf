@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
-		"outDir": "../dist/backend", // build vai pra raiz
-		"rootDir": "src",
+		"outDir": "dist",
+		"rootDir": ".",
 		"module": "CommonJS",
 		"target": "ES2020",
 		"strict": true,
@@ -10,5 +10,5 @@
 		"skipLibCheck": true,
 		"resolveJsonModule": true
 	},
-	"include": ["src/**/*"]
+	"include": ["src/**/*", "api/**/*"]
 }
