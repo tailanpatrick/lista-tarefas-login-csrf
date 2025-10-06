@@ -32,7 +32,7 @@ mongoose
 const allowedOrigins = [
 	'http://localhost:5173',
 	'http://192.168.100.175:5173',
-	'https://agenda-de-contatos-theta-two.vercel.app',
+	'https://lista-tarefas-login-csrf.vercel.app/',
 ];
 
 app.use(
