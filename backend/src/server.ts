@@ -8,6 +8,7 @@ import flash from 'connect-flash';
 import path from 'path';
 import helmet from 'helmet';
 import csurf from 'csurf';
+
 import routes from './routes/api';
 import api from './routes/api';
 import {
@@ -21,47 +22,23 @@ dotenv.config();
 const app: Application = express();
 const CONNECTION_STRING = process.env.MONGO_DB_CONECTION_STRING || '';
 
-if (!CONNECTION_STRING) {
-	console.error(
-		'ERRO: Variável de ambiente MONGO_DB_CONECTION_STRING não está definida.'
-	);
-	process.exit(1);
-}
-
 mongoose
 	.connect(CONNECTION_STRING)
-	.then(() => console.log('MongoDB conectado'))
-	.catch((e) => console.error('Erro de Conexão com MongoDB:', e));
-
-const isProduction =
-	process.env.NODE_ENV === 'production' ||
-	process.env.VERCEL_ENV === 'production';
+	.then(() => app.emit('pronto'))
+	.catch((e) => console.error(e));
 
 const allowedOrigins = [
 	'http://localhost:5173',
 	'http://192.168.100.175:5173',
 	'https://lista-tarefas-login-csrf.vercel.app',
-	process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '',
 ];
 
 app.use(
 	cors({
 		origin: (origin, callback) => {
-			const requestOrigin = origin ? origin.replace(/\/$/, '') : null;
-
-			if (!requestOrigin) {
-				return callback(null, true);
-			}
-
-			if (allowedOrigins.includes(requestOrigin)) {
-				return callback(null, true);
-			}
-
-			if (requestOrigin.endsWith('.vercel.app')) {
-				return callback(null, true);
-			}
-
-			callback(new Error(`Not allowed by CORS: ${requestOrigin}`));
+			if (!origin || allowedOrigins.includes(origin))
+				callback(null, true);
+			else callback(new Error('Not allowed by CORS'));
 		},
 		credentials: true,
 	})
@@ -72,16 +49,11 @@ app.use(express.json());
 app.use(express.static(path.resolve(__dirname, 'public')));
 
 const sessionOptions: session.SessionOptions = {
-	secret: process.env.SESSION_SECRET || 'asdfgasdfg',
+	secret: 'asdfgasdfg',
 	store: MongoStore.create({ mongoUrl: CONNECTION_STRING }),
 	resave: false,
 	saveUninitialized: false,
-	cookie: {
-		maxAge: 1000 * 60 * 60 * 24 * 7,
-		httpOnly: true,
-		secure: isProduction,
-		sameSite: isProduction ? 'none' : 'lax',
-	},
+	cookie: { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true },
 	unset: 'destroy',
 };
 app.use(session(sessionOptions));
@@ -100,22 +72,23 @@ app.use(
 				"'unsafe-eval'",
 				'https://unpkg.com',
 			],
-			connectSrc: [
-				"'self'",
-				'http://192.168.100.175:3000',
-				'https://*.vercel.app',
-			],
+			connectSrc: ["'self'", 'http://192.168.100.175:3000'],
 		},
 	})
 );
 
+/* --------- Middlewares globais --------- */
 app.use(middlewareGlobal);
+
+/* --------- Rotas --------- */
 
 app.use('/api', api);
 app.use(routes);
 
-app.use(checkError);
-
+/* --------- 404 --------- */
 app.use(check404);
+
+/* --------- Middleware de erro --------- */
+app.use(checkError);
 
 export default app;
