@@ -48,15 +48,23 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.resolve(__dirname, 'public')));
 
+// ...
 const sessionOptions: session.SessionOptions = {
 	secret: 'asdfgasdfg',
 	store: MongoStore.create({ mongoUrl: CONNECTION_STRING }),
 	resave: false,
 	saveUninitialized: false,
-	cookie: { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true },
+	cookie: {
+		maxAge: 1000 * 60 * 60 * 24 * 7,
+		httpOnly: true,
+
+		secure: true,
+		sameSite: 'none',
+	},
 	unset: 'destroy',
 };
 app.use(session(sessionOptions));
+
 app.use(flash());
 
 app.use(csurf());
