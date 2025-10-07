@@ -1,7 +1,7 @@
 import express, { Application } from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import cors from 'cors';
+// import cors from 'cors'; // REMOVIDO: Desnecessário quando backend serve o frontend
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import flash from 'connect-flash';
@@ -27,29 +27,15 @@ mongoose
 	.then(() => app.emit('pronto'))
 	.catch((e) => console.error(e));
 
-const allowedOrigins = [
-	'http://localhost:5173',
-	'http://192.168.100.175:5173',
-	'https://agenda-de-contatos-theta-two.vercel.app',
-];
-
-app.use(
-	cors({
-		origin: (origin, callback) => {
-			if (!origin || allowedOrigins.includes(origin))
-				callback(null, true);
-			else callback(new Error('Not allowed by CORS'));
-		},
-		credentials: true,
-	})
-);
-
+// REMOVIDO: allowedOrigins e app.use(cors)
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(path.resolve(__dirname, 'public')));
+
+// REMOVIDO: app.use(express.static(path.resolve(__dirname, 'public')));
+// Se você não tiver uma pasta 'public' separada no backend.
 
 const sessionOptions: session.SessionOptions = {
-	secret: 'asdfgasdfg',
+	secret: process.env.SESSION_SECRET || 'asdfgasdfg',
 	store: MongoStore.create({ mongoUrl: CONNECTION_STRING }),
 	resave: false,
 	saveUninitialized: false,
@@ -72,30 +58,34 @@ app.use(
 				"'unsafe-eval'",
 				'https://unpkg.com',
 			],
-			connectSrc: ["'self'", 'http://192.168.100.175:3000'],
+			// Ajustado: Removeu o IP local e manteve 'self' para a comunicação interna
+			connectSrc: ["'self'"],
 		},
 	})
 );
 
-/* --------- Middlewares globais --------- */
 app.use(middlewareGlobal);
-
-/* --------- Rotas --------- */
 
 app.use('/api', api);
 app.use(routes);
 
-/* --------- 404 --------- */
-app.use(check404);
+const frontendDistPath = path.join(__dirname, '..', 'frontend', 'dist');
 
-/* --------- Middleware de erro --------- */
+app.use(express.static(frontendDistPath));
+
+app.get('*', (req, res) => {
+	if (!req.path.startsWith('/api')) {
+		res.sendFile(path.join(frontendDistPath, 'index.html'));
+	}
+});
+
+app.use(check404);
 app.use(checkError);
 
-/* --------- Inicia servidor --------- */
-// app.on('pronto', () => {
-// 	app.listen(3000, () => {
-// 		console.log('Servidor rodando na porta 3000');
-// 	});
-// });
+app.on('pronto', () => {
+	app.listen(3000, () => {
+		console.log('Servidor rodando na porta 3000');
+	});
+});
 
 export default app;

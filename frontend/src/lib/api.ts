@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-	baseURL: 'lista-tarefas-login-csrf.vercel.app/api',
+	baseURL: '/api',
 	withCredentials: true,
 });
 
