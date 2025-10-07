@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"outDir": "../dist/backend", // build vai pra raiz
+		"outDir": "./dist", // Mantenha a compilação DENTRO de backend/dist
 		"rootDir": "src",
 		"module": "CommonJS",
 		"target": "ES2020",
