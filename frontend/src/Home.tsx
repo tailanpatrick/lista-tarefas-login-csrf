@@ -30,7 +30,7 @@ const Home = () => {
 				userId: '',
 			} as TaskItem;
 
-			const updatedTasks = await Promise.all(
+			await Promise.all(
 				tasks.map(async (task) => {
 					if (taskId === task._id) {
 						updatedTask = {
@@ -43,7 +43,6 @@ const Home = () => {
 				})
 			);
 
-			setTasks(updatedTasks);
 			await createEditTask(updatedTask, setTasks);
 		} catch (error) {
 			console.error('Erro ao atualizar tarefa:', error);
